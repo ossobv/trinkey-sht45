@@ -24,7 +24,7 @@ void setup() {
 
   sht4.setPrecision(SHT4X_HIGH_PRECISION);  
   sht4.setHeater(SHT4X_NO_HEATER);
-  Serial.println("Temperature in *C, Relative Humidity %, touch");
+  Serial.println("# Temperature in *C, Relative Humidity %, touch");
 }
 
 
@@ -41,7 +41,10 @@ void printChipId() {
 
   char buf[33];
   sprintf(buf, "%8x%8x%8x%8x", val1, val2, val3, val4);
+  Serial.print('\"');
   Serial.print(buf);
+  Serial.print('\"');
+
 }
 
 void loop() {
