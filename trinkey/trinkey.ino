@@ -1,8 +1,17 @@
+/*
+
+Trinkey SHT45 implementation with: json output and faster output.
+This makes it usable for a quick reading from a local metric collector like zabbix.
+
+Original source by Limor Fried for Adafruit Industries, 2024.
+https://learn.adafruit.com/adafruit-sht4x-trinkey/arduino-sht4x-demo
+
+*/
 #include <Adafruit_SHT4x.h>
 #include <Adafruit_FreeTouch.h>
 Adafruit_SHT4x sht4 = Adafruit_SHT4x();
 Adafruit_FreeTouch touch = Adafruit_FreeTouch(1, OVERSAMPLE_4, RESISTOR_50K, FREQ_MODE_NONE);
-char sID[7];
+String serial_number;
 
 void setup() {
   Serial.begin(115200);
@@ -25,34 +34,17 @@ void setup() {
   sht4.setPrecision(SHT4X_HIGH_PRECISION);  
   sht4.setHeater(SHT4X_NO_HEATER);
   Serial.println("# Temperature in *C, Relative Humidity %, touch");
+
+  serial_number =  sht4.readSerial();
 }
 
-
-void printChipId() {
-  volatile uint32_t val1, val2, val3, val4;
-  volatile uint32_t *ptr1 = (volatile uint32_t *)0x0080A00C;
-  val1 = *ptr1;
-  volatile uint32_t *ptr = (volatile uint32_t *)0x0080A040;
-  val2 = *ptr;
-  ptr++;
-  val3 = *ptr;
-  ptr++;
-  val4 = *ptr;
-
-  char buf[33];
-  sprintf(buf, "%8x%8x%8x%8x", val1, val2, val3, val4);
-  Serial.print('\"');
-  Serial.print(buf);
-  Serial.print('\"');
-
-}
 
 void loop() {
   sensors_event_t humidity, temp;
 
   sht4.getEvent(&humidity, &temp);// populate temp and humidity objects with fresh data
   Serial.print("{\"serial_number\": ");
-  printChipId();
+  Serial.print(serial_number);
   Serial.print(", \"temperature\": ");
   Serial.print(temp.temperature);
   Serial.print(", \"humidity\": ");
@@ -62,6 +54,6 @@ void loop() {
   Serial.println("}");
 
 
-  // 1 second between readings
+  // 0.1 second between readings
   delay(100);  
 }
